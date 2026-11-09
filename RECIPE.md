@@ -2,6 +2,8 @@
 
 The Changes panel for Jujutsu repos. Open it in a space whose terminal is in a jj repo and it lists what the working-copy change `@` changes, with each file's diff and a box to commit it with `jj commit`. Outside jj it is the shipped git Changes panel.
 
+![Jujutsu Changes](preview.png)
+
 ## What you see
 
 - Header (42px): "Changes", a `N files` pill, a `jj` pill in jj repos, then `+add` (ansi2) and `−del` (ansi1) totals.

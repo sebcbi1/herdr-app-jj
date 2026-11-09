@@ -6,6 +6,8 @@
 - **`jj-menu`** + **`jj-workspace`**: right-click a space in a jj repo for **New jj workspace**, **Open jj workspace** and (in an added one) **Remove jj workspace**, in place of git's worktree items. They put workspaces where Herdr puts worktrees (`~/.herdr/worktrees/<repo>/<name>`) and nest their spaces under the repo. Git repos keep the worktree items.
 - **`spaces-icons.patch`**: the left bar. Instead of git's `detached`, a jj repo's space shows its nearest local bookmark and `↑N` (non-empty changes since it), or `@<change id>` when no bookmark is below `@`. Written for a `spaces` clone (`spaces-icons`); the same `check()` / `checkJj()` change applies to any clone of the shipped `spaces`.
 
+![Jujutsu for Herdr.app](preview.png)
+
 ## Install
 
 ```sh
