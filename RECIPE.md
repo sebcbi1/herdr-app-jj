@@ -23,6 +23,7 @@ The Changes panel for Jujutsu repos. Open it in a space whose terminal is in a j
 - Programs: `jj` (`root`, `log -r @ -T …`, `diff --git`, `resolve --list`, `commit`), `git` as shipped.
 - Status template: `change_id.shortest(8) ++ "\t" ++ if(conflict,"1","0") ++ "\t" ++ description.first_line() ++ "\n" ++ self.diff().stat().files().map(|f| f.status_char() ++ "\t" ++ f.lines_added() ++ "\t" ++ f.lines_removed() ++ "\t" ++ f.path()).join("\n")`.
 - Left bar: `spaces-icons.patch` adds `checkJj()` to a `spaces` clone: `heads(::@ & bookmarks())` → bookmark name; `heads(::@ & bookmarks())..@ ~ empty()` → ahead; else `@<shortest change id>`. All with `--ignore-working-copy`.
+- Workspaces: `mod.clone {"name":"menu","as":"jj-menu"}`; its `checkout()` tries `jj --ignore-working-copy root` first and returns `jj-main` / `jj-linked` (`.jj/repo` is a file in an added workspace), whose space items open the `jj-workspace` dialog (`{space, action: "new"|"open"|"remove"}`, modelled on the shipped `worktree`). `spaces-icons`' `menu(w)` opens `jj-menu`.
 
 ## Watch out
 
@@ -31,6 +32,9 @@ The Changes panel for Jujutsu repos. Open it in a space whose terminal is in a j
 - Pass paths as `root-file:"<path>"`: a bare path is a fileset expression (spaces, parens, globs break it).
 - `f.path()` is repo-relative regardless of cwd.
 - `jj git init` colocates by default now; test jj-only repos with `--no-colocate`.
+- A secondary workspace's `.jj/repo` pointer is relative to its `.jj/` folder.
+- `jj workspace add -r` takes a revset: quote bookmark names (`"feat/x"`).
+- The CLI can't pass props to an overlay: without props `jj-workspace` opens the list for the shown space, which is how it's tested (`mod.open`).
 
 ## Done when
 
@@ -40,3 +44,5 @@ The Changes panel for Jujutsu repos. Open it in a space whose terminal is in a j
 - A plain git repo looks and behaves like the shipped panel.
 - With the panel open and nothing changing, `jj op log` doesn't grow.
 - A colocated jj space in the left bar shows its bookmark and `↑N`, not `detached`.
+- Right-clicking a jj space shows New/Open jj workspace (Remove jj workspace in an added one); a git space shows the worktree items.
+- `mod.open jj-workspace` on a jj space lists every workspace, the main one first, with "open" on the shown one.

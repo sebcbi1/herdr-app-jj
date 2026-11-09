@@ -3,6 +3,7 @@
 [Jujutsu (jj)](https://jj-vcs.github.io/jj/) support for [Herdr.app](https://herdr.dev):
 
 - **`jj-changes`**: the Changes panel, jj-aware. In a jj repo (colocated or not) it lists the working-copy change `@` against its parent with +/- counts, shows each file's diff, and its **Commit** button runs `jj commit -m`. A header row shows `@ <change id> · <description>` and a `conflict` badge. Anywhere else it is the shipped git panel, unchanged.
+- **`jj-menu`** + **`jj-workspace`**: right-click a space in a jj repo for **New jj workspace**, **Open jj workspace** and (in an added one) **Remove jj workspace**, in place of git's worktree items. They put workspaces where Herdr puts worktrees (`~/.herdr/worktrees/<repo>/<name>`) and nest their spaces under the repo. Git repos keep the worktree items.
 - **`spaces-icons.patch`**: the left bar. Instead of git's `detached`, a jj repo's space shows its nearest local bookmark and `↑N` (non-empty changes since it), or `@<change id>` when no bookmark is below `@`. Written for a `spaces` clone (`spaces-icons`); the same `check()` / `checkJj()` change applies to any clone of the shipped `spaces`.
 
 ## Install
@@ -28,9 +29,17 @@ Installing the mod doesn't show it anywhere: a layout picks which mod each block
 - Do it in every layout you use. Shipped layouts (`main`, `terminals`, `win98`) are read-only: clone one first (`herdr-app do layout.clone '{"name":"main","as":"my-layout"}'`, which also switches to it), then edit the clone.
 - Undo: put `"changes"` back.
 
-### Left bar (optional, no layout change)
+### Workspaces menu (no layout change)
 
-The left bar is patched in place: it's a code change to your own clone of `spaces`, which your layout already shows.
+```sh
+cp -R mods/jj-menu mods/jj-workspace ~/.config/herdr-app/mods/
+```
+
+The sidebar decides which menu a right-click opens: the patch below makes it `jj-menu`. `herdr-app do mod.open '{"name":"jj-workspace"}'` (bindable in keys.json) opens the workspace list for the shown space.
+
+### Left bar (no layout change)
+
+The left bar is patched in place: it's a code change to your own clone of `spaces`, which your layout already shows. The same patch switches its right-click menu to `jj-menu`.
 
 Left bar (your own clone of `spaces`, e.g. `mod.clone {"name":"spaces","as":"my-spaces"}`):
 
@@ -44,6 +53,10 @@ cd ~/.config/herdr-app/mods && patch -p1 < /path/to/spaces-icons.patch   # paths
 - File list: one `jj log -r @ -T …` with `self.diff().stat().files()` (status, lines added/removed, path). It snapshots the working copy, so new edits appear.
 - Diff: `jj diff --git -r @ -- root-file:"<path>"`.
 - Every jj call writes under `.jj/` (and `.git/` when colocated). Watch batches made only of those, within 2 s of the panel's own jj call, are ignored, so the panel doesn't refresh itself in a loop. Ops from elsewhere (`jj new`, `jj squash` in a terminal) still refresh it.
+- Workspaces:
+  - **New** runs `jj workspace add --name <name> [-r "<bookmark>"] <path>` from the space's own workspace. A name that is a local bookmark starts the new change on it; the bookmark doesn't move.
+  - **Open** reads `jj workspace list` (folders deleted by hand show "folder missing") and runs `jj workspace update-stale` before switching.
+  - **Remove** closes the space, then runs `jj workspace remove` from the main workspace: jj snapshots the edits into a commit before deleting the folder, and refuses the workspace that holds the repo. Ignored files (`.env`, build output) go with the folder. In a colocated repo jj also adds and removes the matching git worktree.
 - The left bar uses `--ignore-working-copy` (no snapshot, no writes). It watches `.jj/repo`.
 
 ## Limits

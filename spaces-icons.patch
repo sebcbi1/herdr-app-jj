@@ -1,5 +1,5 @@
 --- a/spaces-icons/main.js	2026-11-09 14:14:23
-+++ b/spaces-icons/main.js	2026-11-09 14:14:23
++++ b/spaces-icons/main.js	2026-11-09 14:37:40
 @@ -8,7 +8,7 @@
  import { View, div, svg, image } from "gpui-kit";
  import { findIcon } from "./icons.js";
@@ -75,3 +75,12 @@
    }
  
    watch(repo, cx) {
+@@ -268,7 +310,7 @@
+ 
+   menu(w) {
+     // A popup is as tall as its items; height is only the most.
+-    openOverlay({ mod: "menu", kind: "popup", width: 200, height: 260, props: { tab: "space", target: { id: w.id } } });
++    openOverlay({ mod: "jj-menu", kind: "popup", width: 200, height: 260, props: { tab: "space", target: { id: w.id } } });
+   }
+ 
+   // Spaces in order, each worktree space moved under its main checkout's.
