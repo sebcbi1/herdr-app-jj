@@ -69,6 +69,7 @@ cd ~/.config/herdr-app/mods && patch -p1 < /path/to/spaces-icons.patch   # paths
 - A jj op run in a terminal within 2 s of the panel's own refresh is taken for its echo. The list then catches up on the next 10 s tick.
 - The sidebar doesn't snapshot, so `↑N` ignores edits not yet snapshotted, and plain `git` ops in a colocated repo show after the next jj command.
 - A git repo nested inside a jj workspace shows the outer jj repo.
+- The tab bar's **+** menu (shipped `new-menu`) still offers git worktrees: it is opened by the tab bar mod, so changing it would mean patching that too. Use the space right-click menu, or `mod.open jj-workspace`.
 - The bottom status bar (shipped `workspace-status`) still uses the core's git branch, empty in a colocated jj repo.
 
 ## License
