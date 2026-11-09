@@ -10,6 +10,10 @@
 
 ## Install
 
+With Herdr.app open, ask the agent in your Herdr window: *"add the mod at github.com/sebcbi1/herdr-app-jj"*. It follows [RECIPE.md](RECIPE.md) → *Installing into someone's setup*. That copies the mods, points your layout's Changes block at `jj-changes` (cloning a shipped layout first), and patches your sidebar mod (cloning the shipped `spaces` first).
+
+Or by hand:
+
 ```sh
 cp -R mods/jj-changes ~/.config/herdr-app/mods/
 herdr-app check ~/.config/herdr-app/mods/jj-changes
@@ -31,7 +35,7 @@ Installing the mod doesn't show it anywhere: a layout picks which mod each block
 - Do it in every layout you use. Shipped layouts (`main`, `terminals`, `win98`) are read-only: clone one first (`herdr-app do layout.clone '{"name":"main","as":"my-layout"}'`, which also switches to it), then edit the clone.
 - Undo: put `"changes"` back.
 
-### Workspaces menu (no layout change)
+### Workspaces menu
 
 ```sh
 cp -R mods/jj-menu mods/jj-workspace ~/.config/herdr-app/mods/
@@ -39,15 +43,15 @@ cp -R mods/jj-menu mods/jj-workspace ~/.config/herdr-app/mods/
 
 The sidebar decides which menu a right-click opens: the patch below makes it `jj-menu`. `herdr-app do mod.open '{"name":"jj-workspace"}'` (bindable in keys.json) opens the workspace list for the shown space.
 
-### Left bar (no layout change)
+### Left bar
 
-The left bar is patched in place: it's a code change to your own clone of `spaces`, which your layout already shows. The same patch switches its right-click menu to `jj-menu`.
-
-Left bar (your own clone of `spaces`, e.g. `mod.clone {"name":"spaces","as":"my-spaces"}`):
+The left bar gets a code change to your own clone of `spaces`. The same patch switches its right-click menu to `jj-menu`. If your layout still shows the shipped `spaces`, clone it first (`herdr-app do mod.clone '{"name":"spaces","as":"spaces-jj"}'`). Then point the layout's `spaces` block at the clone; that is the only layout change this step needs.
 
 ```sh
-cd ~/.config/herdr-app/mods && patch -p1 < /path/to/spaces-icons.patch   # paths are spaces-icons/main.js
+patch ~/.config/herdr-app/mods/<your-spaces-clone>/main.js < spaces-icons.patch
 ```
+
+On a fresh clone of the shipped `spaces`, two of the five hunks fail. Add `readTextFile` to its `from "herdr"` import yourself, and skip the `roots()` hunk, which is only for clones with project icons. RECIPE.md → *Installing into someone's setup* step 3 has the details.
 
 ## How it works
 

@@ -38,6 +38,32 @@ The Changes panel for Jujutsu repos. Open it in a space whose terminal is in a j
 - `jj workspace add -r` takes a revset: quote bookmark names (`"feat/x"`).
 - The CLI can't pass props to an overlay: without props `jj-workspace` opens the list for the shown space, which is how it's tested (`mod.open`).
 
+## Installing into someone's setup
+
+For the agent asked to add this mod. Before you start, tell the person that the mods run `jj` and `git` (`exec`, in the space's folder, also on other machines). They read files only inside repos. Nothing reaches the network. `jj` must be on the PATH of each machine where they want jj support; anywhere else the mods behave like Herdr's shipped ones.
+
+1. **Mods.** Copy `mods/jj-changes`, `mods/jj-menu` and `mods/jj-workspace` into `~/.config/herdr-app/mods/`. Copy them, don't symlink: Herdr doesn't hot-reload a symlinked mod. If one of those names is taken, stop and ask.
+2. **Layout: the Changes panel.** The mod shows nowhere until a layout names it.
+   - The shown layout is `"layout"` in `herdr-app status`. A shipped one (`main`, `terminals`, `win98`: listed as `layout:<name>` in `installed.json`) is read-only. Clone it with `herdr-app do layout.clone '{"name":"<name>","as":"<name>-jj"}'`; that also switches to the clone. Then edit the clone.
+   - In `layouts/<name>.json`, find the block whose `content.mod` is `"changes"`. Change only that value to `"jj-changes"`. Keep its `id` (usually `"changes"`): the tab bar's Changes button opens the block by that id. A layout without such a block, like `terminals`, gets none; say so instead of adding one.
+   - Ask whether to do the same in the person's other layouts.
+3. **Sidebar: bookmarks, and jj workspaces on right-click.** Find the block in that layout whose mod draws the spaces list (`content.mod` of the `spaces` node).
+   - If it is the shipped `spaces`, clone it first: `herdr-app do mod.clone '{"name":"spaces","as":"spaces-jj"}'`. Point that block's `content.mod` at the clone.
+   - If it is already the person's own clone (its `mod.json` has `cloned_from: {name: "spaces"}`), patch it in place, after asking.
+   - Patch: `patch <mods>/<sidebar>/main.js < spaces-icons.patch` (name the file: the patch's own paths say `spaces-icons/`). Use `--dry-run` first. On a clone of the shipped `spaces` (0.1.14), hunks 3–5 apply and two fail. Do those two by hand:
+     - **Hunk 1** (the `from "herdr"` import): add `readTextFile` to that clone's own import list. Leave the rest of the line as it is.
+     - **Hunk 2** (`roots()`): only exists in clones that look up project icons. If there is no `roots()`, skip it. If there is, make its repo-path `replace` also strip `/.jj/repo`.
+   - Delete any `.rej` / `.orig` files `patch` leaves behind.
+   - The three changes that matter:
+     - `checkJj()` is defined, and `check()` calls it first;
+     - `menu(w)` opens `"jj-menu"`;
+     - `readTextFile` is imported.
+     Read the result to confirm all three.
+4. **Check.** Run `herdr-app check` on each mod you added or changed. `herdr-app status` must show `"errors": []`. Then work through *Done when* in a jj repo of theirs. Don't commit anything in it: use a throwaway repo (`jj git init`) for Commit and the workspace actions.
+5. **Leave alone.** The tab bar's **+** menu (shipped `new-menu`) keeps its git worktree items. Changing it would mean patching the tab bar mod too, which this mod doesn't do.
+
+Undo: point the layout block back at `"changes"`, reverse the patch (`patch -R`), or put the sidebar block back on the original mod. Then delete the three `jj-*` folders.
+
 ## Done when
 
 - `herdr-app check` passes for `jj-changes` and the patched spaces mod; `herdr-app status` shows no errors.
