@@ -25,6 +25,7 @@ The Changes panel for Jujutsu repos. Open it in a space whose terminal is in a j
 - Programs: `jj` (`root`, `log -r @ -T …`, `diff --git`, `resolve --list`, `commit`), `git` as shipped.
 - Status template: `change_id.shortest(8) ++ "\t" ++ if(conflict,"1","0") ++ "\t" ++ description.first_line() ++ "\n" ++ self.diff().stat().files().map(|f| f.status_char() ++ "\t" ++ f.lines_added() ++ "\t" ++ f.lines_removed() ++ "\t" ++ f.path()).join("\n")`.
 - Left bar: `spaces-icons.patch` adds `checkJj()` to a `spaces` clone: `heads(::@ & bookmarks())` → bookmark name; `heads(::@ & bookmarks())..@ ~ empty()` → ahead; else `@<shortest change id>`. All with `--ignore-working-copy`.
+- Status bar: `mod.clone {"name":"workspace-status","as":"jj-status"}`. Every 10 s while the window is in front, and when the shown folder changes, it runs `jj --ignore-working-copy root`, `workspace list` (the name whose root matches) and the sidebar's two bookmark queries. Label: bookmark `↑N` (ansi2), then `· <workspace>` (dim) when `.jj/repo` is a file. With no bookmark it shows the workspace name alone. Not jj: `space.branch`, as shipped.
 - Workspaces: `mod.clone {"name":"menu","as":"jj-menu"}`; its `checkout()` tries `jj --ignore-working-copy root` first and returns `jj-main` / `jj-linked` (`.jj/repo` is a file in an added workspace), whose space items open the `jj-workspace` dialog (`{space, action: "new"|"open"|"remove"}`, modelled on the shipped `worktree`). `spaces-icons`' `menu(w)` opens `jj-menu`.
 
 ## Watch out
@@ -42,10 +43,11 @@ The Changes panel for Jujutsu repos. Open it in a space whose terminal is in a j
 
 For the agent asked to add this mod. Before you start, tell the person that the mods run `jj` and `git` (`exec`, in the space's folder, also on other machines). They read files only inside repos. Nothing reaches the network. `jj` must be on the PATH of each machine where they want jj support; anywhere else the mods behave like Herdr's shipped ones.
 
-1. **Mods.** Copy `mods/jj-changes`, `mods/jj-menu` and `mods/jj-workspace` into `~/.config/herdr-app/mods/`. Copy them, don't symlink: Herdr doesn't hot-reload a symlinked mod. If one of those names is taken, stop and ask.
+1. **Mods.** Copy `mods/jj-changes`, `mods/jj-status`, `mods/jj-menu` and `mods/jj-workspace` into `~/.config/herdr-app/mods/`. Copy them, don't symlink: Herdr doesn't hot-reload a symlinked mod. If one of those names is taken, stop and ask.
 2. **Layout: the Changes panel.** The mod shows nowhere until a layout names it.
    - The shown layout is `"layout"` in `herdr-app status`. A shipped one (`main`, `terminals`, `win98`: listed as `layout:<name>` in `installed.json`) is read-only. Clone it with `herdr-app do layout.clone '{"name":"<name>","as":"<name>-jj"}'`; that also switches to the clone. Then edit the clone.
    - In `layouts/<name>.json`, find the block whose `content.mod` is `"changes"`. Change only that value to `"jj-changes"`. Keep its `id` (usually `"changes"`): the tab bar's Changes button opens the block by that id. A layout without such a block, like `terminals`, gets none; say so instead of adding one.
+   - Likewise the block whose `content.mod` is `"workspace-status"` → `"jj-status"` (the bottom status bar), if the layout has one.
    - Ask whether to do the same in the person's other layouts.
 3. **Sidebar: bookmarks, and jj workspaces on right-click.** Find the block in that layout whose mod draws the spaces list (`content.mod` of the `spaces` node).
    - If it is the shipped `spaces`, clone it first: `herdr-app do mod.clone '{"name":"spaces","as":"spaces-jj"}'`. Point that block's `content.mod` at the clone.
@@ -62,7 +64,7 @@ For the agent asked to add this mod. Before you start, tell the person that the 
 4. **Check.** Run `herdr-app check` on each mod you added or changed. `herdr-app status` must show `"errors": []`. Then work through *Done when* in a jj repo of theirs. Don't commit anything in it: use a throwaway repo (`jj git init`) for Commit and the workspace actions.
 5. **Leave alone.** The tab bar's **+** menu (shipped `new-menu`) keeps its git worktree items. Changing it would mean patching the tab bar mod too, which this mod doesn't do.
 
-Undo: point the layout block back at `"changes"`, reverse the patch (`patch -R`), or put the sidebar block back on the original mod. Then delete the three `jj-*` folders.
+Undo: point the layout block back at `"changes"`, reverse the patch (`patch -R`), or put the sidebar block back on the original mod. Put the status block back on `"workspace-status"`. Then delete the four `jj-*` folders.
 
 ## Done when
 
@@ -71,6 +73,7 @@ Undo: point the layout block back at `"changes"`, reverse the patch (`patch -R`)
 - Commit leaves `@-` described and an empty `@`; the panel empties.
 - A plain git repo looks and behaves like the shipped panel.
 - With the panel open and nothing changing, `jj op log` doesn't grow.
+- The status bar shows `main ↑N` in a jj repo with a `main` bookmark, `main · feat` in an added workspace `feat`, `default` in a repo without bookmarks, and the git branch in a git repo.
 - A colocated jj space in the left bar shows its bookmark and `↑N`, not `detached`.
 - Right-clicking a jj space shows New/Open jj workspace (Remove jj workspace in an added one); a git space shows the worktree items.
 - `mod.open jj-workspace` on a jj space lists every workspace, the main one first, with "open" on the shown one.

@@ -4,6 +4,7 @@
 
 - **`jj-changes`**: the Changes panel, jj-aware. In a jj repo (colocated or not) it lists the working-copy change `@` against its parent with +/- counts, shows each file's diff, and its **Commit** button runs `jj commit -m`. A header row shows `@ <change id> · <description>` and a `conflict` badge. Anywhere else it is the shipped git panel, unchanged.
 - **`jj-menu`** + **`jj-workspace`**: right-click a space in a jj repo for **New jj workspace**, **Open jj workspace** and (in an added one) **Remove jj workspace**, in place of git's worktree items. They put workspaces where Herdr puts worktrees (`~/.herdr/worktrees/<repo>/<name>`) and nest their spaces under the repo. Git repos keep the worktree items.
+- **`jj-status`**: the bottom status bar, jj-aware. In a jj repo the branch label shows the nearest bookmark and `↑N`, plus the workspace name in an added workspace (`main ↑2 · feat`). With no bookmark it shows the workspace name. Elsewhere it shows the git branch, as shipped.
 - **`spaces-icons.patch`**: the left bar. Instead of git's `detached`, a jj repo's space shows its nearest local bookmark and `↑N` (non-empty changes since it), or `@<change id>` when no bookmark is below `@`. Written for a `spaces` clone (`spaces-icons`); the same `check()` / `checkJj()` change applies to any clone of the shipped `spaces`.
 
 ![Jujutsu for Herdr.app](preview.png)
@@ -15,13 +16,13 @@ With Herdr.app open, ask the agent in your Herdr window: *"add the mod at github
 Or by hand:
 
 ```sh
-cp -R mods/jj-changes ~/.config/herdr-app/mods/
+cp -R mods/jj-changes mods/jj-status ~/.config/herdr-app/mods/
 herdr-app check ~/.config/herdr-app/mods/jj-changes
 ```
 
 Copy, don't symlink: Herdr.app doesn't hot-reload a symlinked mod folder.
 
-### Layout change (required for the panel)
+### Layout change (required for the panel and status bar)
 
 Installing the mod doesn't show it anywhere: a layout picks which mod each block shows, and the shipped `changes` mod can't be replaced (Herdr restores shipped mods on every start). Point your layout's Changes block at `jj-changes`, in `~/.config/herdr-app/layouts/<your-layout>.json` (the shown one is `"layout"` in `herdr-app status`):
 
@@ -34,6 +35,8 @@ Installing the mod doesn't show it anywhere: a layout picks which mod each block
 - Keep the block id `changes`: the tab bar's **Changes** button opens the node by that id.
 - Do it in every layout you use. Shipped layouts (`main`, `terminals`, `win98`) are read-only: clone one first (`herdr-app do layout.clone '{"name":"main","as":"my-layout"}'`, which also switches to it), then edit the clone.
 - Undo: put `"changes"` back.
+
+The status bar works the same way: point the `status` block (`"mod": "workspace-status"`) at `"jj-status"`.
 
 ### Workspaces menu
 
@@ -74,7 +77,6 @@ On a fresh clone of the shipped `spaces`, two of the five hunks fail. Add `readT
 - The sidebar doesn't snapshot, so `↑N` ignores edits not yet snapshotted, and plain `git` ops in a colocated repo show after the next jj command.
 - A git repo nested inside a jj workspace shows the outer jj repo.
 - The tab bar's **+** menu (shipped `new-menu`) still offers git worktrees: it is opened by the tab bar mod, so changing it would mean patching that too. Use the space right-click menu, or `mod.open jj-workspace`.
-- The bottom status bar (shipped `workspace-status`) still uses the core's git branch, empty in a colocated jj repo.
 
 ## License
 
